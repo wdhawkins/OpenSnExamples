@@ -1,3 +1,5 @@
+[![Nightly Tests](https://github.com/Open-Sn/OpenSnAppsPublic/actions/workflows/nightly.yaml/badge.svg)](https://github.com/Open-Sn/OpenSnAppsPublic/actions/workflows/nightly.yaml)
+
 # OpenSnAppsPublic
 
 This directory contains applications and example problems that use OpenSn.  
