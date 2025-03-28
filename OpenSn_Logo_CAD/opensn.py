@@ -14,7 +14,7 @@ if "opensn_console" not in globals():
     # Append parent directory to locate the pyopensn modules
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../")))
     from pyopensn.mesh import MeshGenerator, FromFileMeshGenerator
-    from pyopensn.xs import CreateSimpleOneGroup
+    from pyopensn.xs import MultiGroupXS, CreateSimpleOneGroup
     from pyopensn.source import VolumetricSource
     from pyopensn.aquad import GLCProductQuadrature3DXYZ
     from pyopensn.solver import DiscreteOrdinatesSolver, SteadyStateSolver
@@ -58,8 +58,8 @@ if __name__ == "__main__":
             }
         ],
         xs_map=[
-            { "block_ids": [0], "xs": xs_source },
-            { "block_ids": [1], "xs": xs_block },
+            {"block_ids": [0], "xs": xs_source},
+            {"block_ids": [1], "xs": xs_block},
         ],
         options={
             "scattering_order": 0,
