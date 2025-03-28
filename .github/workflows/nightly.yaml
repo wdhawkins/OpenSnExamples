@@ -1,0 +1,30 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: [self-hosted]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: checkout examples
+        uses: actions/checkout@v4
+      - name: checkout opensn
+        uses: actions/checkout@v4
+        with:
+          repository: Open-Sn/opensn
+          path: opensn
+      - name: compile opensn
+        shell: bash
+        run: |
+          module load opensn/clang/17 python3/3.12.3
+          cd opensn && mkdir build && cd build && cmake -DOPENSN_WITH_PYTHON=True .. && make -j
+      - name: test examples
+        shell: bash
+        run: |
+          module load opensn/clang/17 python3/3.12.3
+          cd OpenSn_Logo_CAD && mpirun -np 8 ../opensn/build/python/opensn -i opensn.py
