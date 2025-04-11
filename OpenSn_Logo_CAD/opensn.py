@@ -17,7 +17,7 @@ if "opensn_console" not in globals():
     from pyopensn.xs import MultiGroupXS, CreateSimpleOneGroup
     from pyopensn.source import VolumetricSource
     from pyopensn.aquad import GLCProductQuadrature3DXYZ
-    from pyopensn.solver import DiscreteOrdinatesSolver, SteadyStateSolver
+    from pyopensn.solver import DiscreteOrdinatesProblem, SteadyStateSolver
     from pyopensn.fieldfunc import FieldFunctionGridBased
 
 if __name__ == "__main__":
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     pquad = GLCProductQuadrature3DXYZ(Npolar, Nazimuthal)
 
     # Solver
-    phys = DiscreteOrdinatesSolver(
+    phys = DiscreteOrdinatesProblem(
         mesh=grid,
         num_groups=Ng,
         groupsets=[
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             "volumetric_sources": [src],
         }
     )
-    ss_solver = SteadyStateSolver(lbs_solver=phys)
+    ss_solver = SteadyStateSolver(lbs_problem=phys)
     ss_solver.Initialize()
     ss_solver.Execute()
 

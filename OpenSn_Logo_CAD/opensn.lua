@@ -22,9 +22,9 @@ src_strength[1] = 100.0
 src = lbs.VolumetricSource.Create({ block_ids = {0}, group_strength = src_strength })
 
 -- Quadrature
-Npolar = 4
-Nazimuthal = 4
-pquad = aquad.CreateGLCProductQuadrature3DXYZ(Nazimuthal, Npolar)
+Npolar = 8
+Nazimuthal = 16
+pquad = aquad.CreateGLCProductQuadrature3DXYZ(Npolar, Nazimuthal)
 
 -- Set up solver
 lbs_block = {
@@ -51,9 +51,9 @@ lbs_options = {
   volumetric_sources = { src },
 }
 
-phys = lbs.DiscreteOrdinatesSolver.Create(lbs_block)
+phys = lbs.DiscreteOrdinatesProblem.Create(lbs_block)
 phys:SetOptions(lbs_options)
-ss_solver = lbs.SteadyStateSolver.Create({ lbs_solver = phys })
+ss_solver = lbs.SteadyStateSolver.Create({ lbs_problem = phys })
 
 -- Solve
 ss_solver:Initialize()
