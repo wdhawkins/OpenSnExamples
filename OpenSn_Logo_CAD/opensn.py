@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Source
     src_strength = [0.0 for _ in range(Ng)]
     src_strength[0] = 100.0
-    src = VolumetricSource(block_ids=[0], group_strength=src_strength)
+    src = VolumetricSource(block_ids=[1], group_strength=src_strength)
 
     # Quadrature
     Npolar = 8
@@ -58,8 +58,8 @@ if __name__ == "__main__":
             }
         ],
         xs_map=[
-            {"block_ids": [0], "xs": xs_source},
-            {"block_ids": [1], "xs": xs_block},
+            {"block_ids": [1], "xs": xs_source},
+            {"block_ids": [2], "xs": xs_block},
         ],
         options={
             "scattering_order": 0,

@@ -19,7 +19,7 @@ for g = 1, Ng do
   src_strength[g] = 0.0
 end
 src_strength[1] = 100.0
-src = lbs.VolumetricSource.Create({ block_ids = {0}, group_strength = src_strength })
+src = lbs.VolumetricSource.Create({ block_ids = {1}, group_strength = src_strength })
 
 -- Quadrature
 Npolar = 8
@@ -41,8 +41,8 @@ lbs_block = {
     },
   },
   xs_map = {
-    { block_ids = {0}, xs = xs_source },
-    { block_ids = {1}, xs = xs_block },
+    { block_ids = {1}, xs = xs_source },
+    { block_ids = {2}, xs = xs_block },
   },
 }
 
