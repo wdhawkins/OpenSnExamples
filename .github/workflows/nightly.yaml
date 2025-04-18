@@ -27,4 +27,5 @@ jobs:
         shell: bash
         run: |
           module load opensn/clang/17 python3/3.12.3
-          cd OpenSn_Logo_CAD && mpirun -np 8 ../opensn/build/python/opensn -i opensn.py
+          cd OpenSn_Logo_CAD && mpirun -np 8 ../opensn/build/python/opensn -i opensn.py && cd ..
+          cd Urban_Source && mpirun -np 16 ../opensn/build/python/opensn -i urban_source.py
