@@ -29,3 +29,4 @@ jobs:
           module load opensn/clang/17 python3/3.12.3
           cd OpenSn_Logo_CAD && mpirun -np 8 ../opensn/build/python/opensn -i opensn.py && cd ..
           cd Urban_Source && mpirun -np 96 ../opensn/build/python/opensn -i urban_source.py
+          cd HEU_MET_FAST_003 && mpirun -np 12 ../opensn/build/python/opensn -i HEU_MET_FAST_003.py
