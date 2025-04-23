@@ -1,13 +1,13 @@
 [![Nightly Tests](https://github.com/Open-Sn/OpenSnAppsPublic/actions/workflows/nightly.yaml/badge.svg)](https://github.com/Open-Sn/OpenSnAppsPublic/actions/workflows/nightly.yaml)
 
-# OpenSnAppsPublic
+# OpenSn Examples
 
-This directory contains applications and example problems that use OpenSn.  
-A short description of each applicaiton/example is given below:
+This directory contains example problems that use OpenSn.  
+A short description of each example is given below:
 
-- **OpenSn_Logo_CAD**  
+- [OpenSn_Logo_CAD](./OpenSn_Loga_CAD/README.md):  
     3D fixed-source problem with a source region in the shape of the OpenSn logo
-- **Urban_Source**  
+- [Urban_Source](./Urban_Source/README.md):  
     3D fixed-source problem that models a source in an urban setting
-- **HEU_MET_FAST_003**
+- [HEU_MET_FAST_003](./HEU_MET_FAST_003/README.md):  
     3D criticality benchmark problem
