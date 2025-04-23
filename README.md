@@ -5,7 +5,7 @@
 This directory contains example problems that use OpenSn.  
 A short description of each example is given below:
 
-- [OpenSn_Logo_CAD](./OpenSn_Loga_CAD/README.md):  
+- [OpenSn_Logo_CAD](./OpenSn_Logo_CAD/README.md):  
     3D fixed-source problem with a source region in the shape of the OpenSn logo
 - [Urban_Source](./Urban_Source/README.md):  
     3D fixed-source problem that models a source in an urban setting
