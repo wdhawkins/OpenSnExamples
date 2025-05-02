@@ -13,7 +13,7 @@ The example illustrates a complete CAD-to-OpenSn workflow:
 4. The STEP file is meshed using Gmsh ([urban_source.geo](./urban_source.geo)) and the resulting
    `.msh` file can be read directly by OpenSn
     
-The Python OpenSn input file for this example can be found here: [opensn.py](./opensn.py).
+The Python OpenSn input file for this example can be found here: [urban_source.py](./urban_source.py).
 
 <figure>
   <img src="urban_source_cad.png" alt="CAD Model" width="600"/>
