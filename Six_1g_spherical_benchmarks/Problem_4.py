@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Problem 2
+Problem 3
 Chang, B. (2021a, February 19).
 Six 1D polar transport test problems for the deterministic and monte-carlo method.
 LLNL-TR-819680
@@ -36,12 +36,12 @@ if __name__ == "__main__":
     # create XS
     num_groups = 1
     xs_void = MultiGroupXS()
-    sigt = 0.0
-    c = 0.0
-    xs_void.CreateSimpleOneGroup(sigma_t=sigt,c=c)
+    xs_void.CreateSimpleOneGroup(sigma_t=0.0,c=0.0)
+    xs_mat = MultiGroupXS()
+    xs_mat.CreateSimpleOneGroup(sigma_t=1.0,c=0.0)
 
     # volumetric src
-    mg_src = VolumetricSource(block_ids=[1], group_strength=[1.])
+    bsrc = [ 1. ]
 
     # angular quadrature
     nazimu = 4
@@ -65,21 +65,20 @@ if __name__ == "__main__":
             },
         ],
         xs_map=[
-            {"block_ids": [1,2], "xs": xs_void},
+            {"block_ids": [1], "xs": xs_mat},
+            {"block_ids": [2], "xs": xs_void},
         ],
         options={
             "scattering_order": 0,
-            "volumetric_sources": [mg_src],
             "boundary_conditions": [
-                {"name":"xmin", "type":"vacuum"},
-                {"name":"xmax", "type":"vacuum"},
-                {"name":"ymin", "type":"vacuum"},
-                {"name":"ymax", "type":"vacuum"},
-                {"name":"zmin", "type":"vacuum"},
-                {"name":"zmax", "type":"vacuum"}
+                {"name":"xmin", "type":"isotropic", "group_strength":bsrc},
+                {"name":"xmax", "type":"isotropic", "group_strength":bsrc},
+                {"name":"ymin", "type":"isotropic", "group_strength":bsrc},
+                {"name":"ymax", "type":"isotropic", "group_strength":bsrc},
+                {"name":"zmin", "type":"isotropic", "group_strength":bsrc},
+                {"name":"zmax", "type":"isotropic", "group_strength":bsrc}
             ]
         },
-
     )
 
     ss_solver = SteadyStateSolver(lbs_problem=phys)
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     # export
     fflist = phys.GetFieldFunctions()
     """
-        vtk_basename = "Problem_2_"
+        vtk_basename = "Problem_4_"
         # export only the scalar flux of group g
         FieldFunctionGridBased.ExportMultipleToVTK(
             [fflist[g] for g in range(num_groups)],
@@ -129,22 +128,32 @@ if __name__ == "__main__":
             print("end-radius: {:.2f}, avg-value: {:.6f}".format(r, v))
 
     # compute the analytical answer
-    def get_phi(r, q, a):
-        a2 = a**2
-        r2 = r**2
-        phi = q * ( a + (a2-r2)/(2*r) * np.log( (a+r)/np.abs(r-a) ) )
+    from scipy.special import exp1
+    from scipy.integrate import quad
+
+    def E2(x):
+        return np.exp(-x)-x*exp1(x)
+
+    def get_phi(r, psi, a, sig):
+        if r <= a:
+            phi = (psi/(2*r))*((np.exp(-sig*(a-r))-np.exp(-sig*(a+r)))/sig + (r+a)*E2(sig*(a-r)) - (a-r)*E2(sig*(a+r)))
+        else:
+            a2 = a**2
+            r2 = r**2
+            phi = psi*(((1-a2/r2)**(1/2))+1+quad(lambda x: np.exp(-2*sig*(a2-r2*(1-x**2))**(1/2)),(1-a2/r2)**(1/2),1)[0])
         return phi
 
     if rank==0:
 
-        q = 0.5
+        psi_0 = 2 * np.pi
         a = 0.5
+        sigt = 1.0
         eps = 1e-3
         r_fine = np.linspace(0.+eps, 1.0-eps, 100)
         exact_phi = np.zeros_like(r_fine)
         for i,r in enumerate(r_fine):
-            exact_phi[i] = get_phi(r, q, a)
-            # print(r_fine[i], exact_phi[i])
+            exact_phi[i] = get_phi(r, psi_0, a, sigt)
+            print(r_fine[i], exact_phi[i])
 
 
         import matplotlib.pyplot as plt
@@ -158,5 +167,5 @@ if __name__ == "__main__":
         plt.grid(True)
         plt.legend()
         # Save the figure as a PNG file
-        plt.savefig("Problem_2.png", dpi=300, bbox_inches='tight')
+        plt.savefig("Problem_4.png", dpi=300, bbox_inches='tight')
         plt.show()
