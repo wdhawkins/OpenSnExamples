@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Problem 3
+Problem 4
 Chang, B. (2021a, February 19).
 Six 1D polar transport test problems for the deterministic and monte-carlo method.
 LLNL-TR-819680
@@ -16,13 +16,12 @@ if "opensn_console" not in globals():
     from mpi4py import MPI
     size = MPI.COMM_WORLD.size
     rank = MPI.COMM_WORLD.rank
-    # Append parent directory to locate the pyopensn modules
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../")))
     from pyopensn.mesh import FromFileMeshGenerator, PETScGraphPartitioner
     from pyopensn.xs import MultiGroupXS
     from pyopensn.aquad import GLCProductQuadrature3DXYZ
     from pyopensn.solver import DiscreteOrdinatesProblem, SteadyStateSolver
-    from pyopensn.fieldfunc import FieldFunctionGridBased, GetFieldFunctions
+    from pyopensn.fieldfunc import FieldFunctionInterpolationVolume
     from pyopensn.logvol import SphereLogicalVolume, BooleanLogicalVolume
 
 if __name__ == "__main__":
@@ -33,17 +32,17 @@ if __name__ == "__main__":
     )
     grid = meshgen.Execute()
 
-    # create XS
+    # Create XS
     num_groups = 1
     xs_void = MultiGroupXS()
-    xs_void.CreateSimpleOneGroup(sigma_t=0.0,c=0.0)
+    xs_void.CreateSimpleOneGroup(sigma_t=0.0, c=0.0)
     xs_mat = MultiGroupXS()
-    xs_mat.CreateSimpleOneGroup(sigma_t=1.0,c=0.0)
+    xs_mat.CreateSimpleOneGroup(sigma_t=1.0, c=0.0)
 
-    # volumetric src
-    bsrc = [ 1. ]
+    # Boundary source
+    bsrc = [1.0]
 
-    # angular quadrature
+    # Angular quadrature
     nazimu = 4
     npolar = 2
     pquad = GLCProductQuadrature3DXYZ(npolar, nazimu)
@@ -61,7 +60,7 @@ if __name__ == "__main__":
                 "angle_aggregation_num_subsets": 1,
                 "l_max_its": 500,
                 "l_abs_tol": 1.0e-6,
-                "gmres_restart_interval": 30
+                "gmres_restart_interval": 30,
             },
         ],
         xs_map=[
@@ -71,13 +70,13 @@ if __name__ == "__main__":
         options={
             "scattering_order": 0,
             "boundary_conditions": [
-                {"name":"xmin", "type":"isotropic", "group_strength":bsrc},
-                {"name":"xmax", "type":"isotropic", "group_strength":bsrc},
-                {"name":"ymin", "type":"isotropic", "group_strength":bsrc},
-                {"name":"ymax", "type":"isotropic", "group_strength":bsrc},
-                {"name":"zmin", "type":"isotropic", "group_strength":bsrc},
-                {"name":"zmax", "type":"isotropic", "group_strength":bsrc}
-            ]
+                {"name": "xmin", "type": "isotropic", "group_strength": bsrc},
+                {"name": "xmax", "type": "isotropic", "group_strength": bsrc},
+                {"name": "ymin", "type": "isotropic", "group_strength": bsrc},
+                {"name": "ymax", "type": "isotropic", "group_strength": bsrc},
+                {"name": "zmin", "type": "isotropic", "group_strength": bsrc},
+                {"name": "zmax", "type": "isotropic", "group_strength": bsrc},
+            ],
         },
     )
 
@@ -85,17 +84,10 @@ if __name__ == "__main__":
     ss_solver.Initialize()
     ss_solver.Execute()
 
-    # export
+    # Export
     fflist = phys.GetFieldFunctions()
-    """
-        vtk_basename = "Problem_4_"
-        # export only the scalar flux of group g
-        FieldFunctionGridBased.ExportMultipleToVTK(
-            [fflist[g] for g in range(num_groups)],
-            vtk_basename
-        )
-    """
-    # compute the average flux over a logical volume
+
+    # Compute the average flux over a logical volume
     def average_flx_logvol(logvol):
         ffvol = FieldFunctionInterpolationVolume()
         ffvol.SetOperationType("avg")
@@ -106,7 +98,7 @@ if __name__ == "__main__":
         avgval = ffvol.GetValue()
         return avgval
 
-    # compute the average flux over spherical shells
+    # Compute the average flux over spherical shells
     def compute_average_flux(N_logvols, r_max):
         r_vals = np.linspace(0, r_max, N_logvols + 1)
         avg_flx = np.zeros(N_logvols)
@@ -114,58 +106,70 @@ if __name__ == "__main__":
             if i != 0:
                 inner_vol = SphereLogicalVolume(r=r_vals[i])
                 outer_vol = SphereLogicalVolume(r=r_vals[i + 1])
-                logvol = BooleanLogicalVolume(parts=[{"op":True,"lv":outer_vol},{"op":False,"lv":inner_vol}])
+                logvol = BooleanLogicalVolume(parts=[
+                    {"op": True, "lv": outer_vol},
+                    {"op": False, "lv": inner_vol},
+                ])
             else:
                 logvol = SphereLogicalVolume(r=r_vals[i + 1])
             avg_flx[i] = average_flx_logvol(logvol)
         return r_vals, avg_flx
 
-    # perform the calculation
+    # Perform the calculation
     N_logvols = 15
     r_vals, avg_flx = compute_average_flux(N_logvols, 1)
     if rank == 0:
-        for r,v in zip(r_vals[1:],avg_flx):
+        for r, v in zip(r_vals[1:], avg_flx):
             print("end-radius: {:.2f}, avg-value: {:.6f}".format(r, v))
 
-    # compute the analytical answer
+    # Compute the analytical answer
     from scipy.special import exp1
     from scipy.integrate import quad
 
     def E2(x):
-        return np.exp(-x)-x*exp1(x)
+        return np.exp(-x) - x * exp1(x)
 
     def get_phi(r, psi, a, sig):
         if r <= a:
-            phi = (psi/(2*r))*((np.exp(-sig*(a-r))-np.exp(-sig*(a+r)))/sig + (r+a)*E2(sig*(a-r)) - (a-r)*E2(sig*(a+r)))
+            term1 = (np.exp(-sig * (a - r)) - np.exp(-sig * (a + r))) / sig
+            term2 = (r + a) * E2(sig * (a - r))
+            term3 = (a - r) * E2(sig * (a + r))
+            phi = psi / (2 * r) * (term1 + term2 - term3)
         else:
-            a2 = a**2
-            r2 = r**2
-            phi = psi*(((1-a2/r2)**(1/2))+1+quad(lambda x: np.exp(-2*sig*(a2-r2*(1-x**2))**(1/2)),(1-a2/r2)**(1/2),1)[0])
+            a2 = a ** 2
+            r2 = r ** 2
+            sqrt1 = np.sqrt(1 - a2 / r2)
+
+            def integrand(x):
+                return np.exp(-2 * sig * np.sqrt(a2 - r2 * (1 - x ** 2)))
+
+            phi = psi * (sqrt1 + 1 + quad(integrand, sqrt1, 1)[0])
         return phi
 
-    if rank==0:
-
+    if rank == 0:
         psi_0 = 2 * np.pi
         a = 0.5
         sigt = 1.0
         eps = 1e-3
-        r_fine = np.linspace(0.+eps, 1.0-eps, 100)
+        r_fine = np.linspace(0.0 + eps, 1.0 - eps, 100)
         exact_phi = np.zeros_like(r_fine)
-        for i,r in enumerate(r_fine):
+        for i, r in enumerate(r_fine):
             exact_phi[i] = get_phi(r, psi_0, a, sigt)
             print(r_fine[i], exact_phi[i])
-
 
         import matplotlib.pyplot as plt
 
         plt.figure()
         plt.plot(r_fine, exact_phi, label='Exact')
-        plt.step(r_vals, np.append(avg_flx, avg_flx[-1]), where='post', label='Radial Average Flux in Spherical Shells')
+        plt.step(
+            r_vals, np.append(avg_flx, avg_flx[-1]),
+            where='post',
+            label='Radial Average Flux in Spherical Shells'
+        )
         plt.xlabel("Radius")
         plt.ylabel("Average Flux")
         plt.title("Flux as a function of radius")
         plt.grid(True)
         plt.legend()
-        # Save the figure as a PNG file
         plt.savefig("Problem_4.png", dpi=300, bbox_inches='tight')
         plt.show()
