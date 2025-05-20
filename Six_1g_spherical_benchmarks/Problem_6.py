@@ -21,11 +21,7 @@ if "opensn_console" not in globals():
     from pyopensn.xs import MultiGroupXS
     from pyopensn.aquad import GLCProductQuadrature3DXYZ
     from pyopensn.solver import DiscreteOrdinatesProblem, SteadyStateSolver
-    from pyopensn.fieldfunc import (
-        FieldFunctionGridBased,
-        GetFieldFunctions,
-        FieldFunctionInterpolationVolume,
-    )
+    from pyopensn.fieldfunc import FieldFunctionInterpolationVolume
     from pyopensn.logvol import SphereLogicalVolume, BooleanLogicalVolume
     from pyopensn.source import VolumetricSource
 
