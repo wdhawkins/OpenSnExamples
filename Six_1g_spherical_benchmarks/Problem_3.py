@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Problem 2
+Problem 3
 Chang, B. (2021a, February 19).
 Six 1D polar transport test problems for the deterministic and monte-carlo method.
 LLNL-TR-819680
@@ -28,7 +28,7 @@ if "opensn_console" not in globals():
 if __name__ == "__main__":
 
     meshgen = FromFileMeshGenerator(
-        filename="./meshes/two_spheres.msh",
+        filename="./meshes/three_region_sphere.msh",
         partitioner=PETScGraphPartitioner(type='parmetis'),
     )
     grid = meshgen.Execute()
@@ -36,12 +36,12 @@ if __name__ == "__main__":
     # create XS
     num_groups = 1
     xs_void = MultiGroupXS()
-    sigt = 0.0
-    c = 0.0
-    xs_void.CreateSimpleOneGroup(sigma_t=sigt,c=c)
+    xs_void.CreateSimpleOneGroup(sigma_t=0.0,c=0.0)
+    # xs_mat = MultiGroupXS()
+    # xs_mat.CreateSimpleOneGroup(sigma_t=1.0,c=0.0)
 
     # volumetric src
-    mg_src = VolumetricSource(block_ids=[1], group_strength=[1.])
+    mg_src = VolumetricSource(block_ids=[2], group_strength=[1.])
 
     # angular quadrature
     nazimu = 4
@@ -65,7 +65,7 @@ if __name__ == "__main__":
             },
         ],
         xs_map=[
-            {"block_ids": [1,2], "xs": xs_void},
+            {"block_ids": [1,2,3], "xs": xs_void},
         ],
         options={
             "scattering_order": 0,
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # export
     fflist = phys.GetFieldFunctions()
     """
-        vtk_basename = "Problem_2_"
+        vtk_basename = "Problem_3_"
         # export only the scalar flux of group g
         FieldFunctionGridBased.ExportMultipleToVTK(
             [fflist[g] for g in range(num_groups)],
@@ -129,21 +129,23 @@ if __name__ == "__main__":
             print("end-radius: {:.2f}, avg-value: {:.6f}".format(r, v))
 
     # compute the analytical answer
-    def get_phi(r, q, a):
+    def get_phi(r, q, a, b):
         a2 = a**2
+        b2 = b**2
         r2 = r**2
-        phi = q * ( a + (a2-r2)/(2*r) * np.log( (a+r)/np.abs(r-a) ) )
+        phi = q*(b+(b2-r2)/(2*r)*np.log((b+r)/(np.abs(r-b))))-q*(a+(a2-r2)/(2*r)*np.log((a+r)/(np.abs(r-a))))
         return phi
 
     if rank==0:
 
         q = 0.5
-        r_mid = 0.5
+        a = 1./3.
+        b = 2./3.
         eps = 1e-3
         r_fine = np.linspace(0.+eps, 1.0-eps, 100)
         exact_phi = np.zeros_like(r_fine)
         for i,r in enumerate(r_fine):
-            exact_phi[i] = get_phi(r, q, r_mid)
+            exact_phi[i] = get_phi(r, q, a, b)
             print(r_fine[i], exact_phi[i])
 
 
@@ -158,5 +160,5 @@ if __name__ == "__main__":
         plt.grid(True)
         plt.legend()
         # Save the figure as a PNG file
-        plt.savefig("Problem_2.png", dpi=300, bbox_inches='tight')
+        plt.savefig("Problem_3.png", dpi=300, bbox_inches='tight')
         plt.show()
