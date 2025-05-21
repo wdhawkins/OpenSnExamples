@@ -27,7 +27,7 @@ if "opensn_console" not in globals():
 if __name__ == "__main__":
 
     meshgen = FromFileMeshGenerator(
-        filename="./meshes/two_spheres.msh",
+        filename="./meshes/two_region_sphere.msh",
         partitioner=PETScGraphPartitioner(type='parmetis'),
     )
     grid = meshgen.Execute()
