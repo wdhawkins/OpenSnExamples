@@ -39,9 +39,7 @@ if __name__ == "__main__":
     src = VolumetricSource(block_ids=[1], group_strength=src_strength)
 
     # Quadrature
-    Npolar = 8
-    Nazimuthal = 16
-    pquad = GLCProductQuadrature3DXYZ(Npolar, Nazimuthal)
+    pquad = GLCProductQuadrature3DXYZ(n_polar=8, n_azimuthal=16)
 
     # Solver
     phys = DiscreteOrdinatesProblem(
