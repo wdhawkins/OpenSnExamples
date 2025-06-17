@@ -28,4 +28,4 @@ jobs:
         run: |
           module load opensn/clang/17 python3/3.12.3
           export OPENSN=$PWD/opensn/build/python/opensn
-          python3 tests.py
+          python3 test.py
