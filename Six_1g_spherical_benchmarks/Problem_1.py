@@ -80,9 +80,7 @@ if __name__ == "__main__":
     bsrc = [1.0]
 
     # Angular quadrature
-    nazimu = 4
-    npolar = 2
-    pquad = GLCProductQuadrature3DXYZ(npolar, nazimu)
+    pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4)
 
     # Solver
     phys = DiscreteOrdinatesProblem(
