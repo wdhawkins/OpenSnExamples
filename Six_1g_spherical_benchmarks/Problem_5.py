@@ -40,7 +40,7 @@ if __name__ == "__main__":
     xs_mat.CreateSimpleOneGroup(sigma_t=1.0, c=0.0)
 
     # Boundary source
-    bsrc = [1.0]
+    bsrc = [4.0 * np.pi]
 
     # Angular quadrature
     pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4)
