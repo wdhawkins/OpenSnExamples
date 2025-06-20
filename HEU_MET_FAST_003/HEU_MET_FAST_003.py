@@ -88,7 +88,11 @@ if __name__ == "__main__":
         groupsets=[
             {
                 "groups_from_to": (0, num_groups - 1),
-                "angular_quadrature": GLCProductQuadrature3DXYZ(n_polar=8, n_azimuthal=16),
+                "angular_quadrature": GLCProductQuadrature3DXYZ(
+                    n_polar=8,
+                    n_azimuthal=16,
+                    scattering_order=3
+                ),
                 "inner_linear_method": "petsc_gmres",
                 "angle_aggregation_type": "single",
                 "angle_aggregation_num_subsets": 1,

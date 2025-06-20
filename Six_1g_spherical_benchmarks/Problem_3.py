@@ -42,7 +42,7 @@ if __name__ == "__main__":
     mg_src = VolumetricSource(block_ids=[2], group_strength=[1.0])
 
     # Angular quadrature
-    pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4)
+    pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4, scattering_order=0)
 
     # Solver
     phys = DiscreteOrdinatesProblem(
