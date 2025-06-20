@@ -43,7 +43,7 @@ if __name__ == "__main__":
     bsrc = [4.0 * np.pi]
 
     # Angular quadrature
-    pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4)
+    pquad = GLCProductQuadrature3DXYZ(n_polar=2, n_azimuthal=4, scattering_order=0)
 
     # Solver
     phys = DiscreteOrdinatesProblem(
