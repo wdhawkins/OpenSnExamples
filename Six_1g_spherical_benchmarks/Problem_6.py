@@ -66,8 +66,8 @@ if __name__ == "__main__":
             {"block_ids": [1], "xs": xs_mat},
             {"block_ids": [2], "xs": xs_void},
         ],
+        scattering_order=0,
         options={
-            "scattering_order": 0,
             "volumetric_sources": [mg_src],
             "boundary_conditions": [
                 {"name": "xmin", "type": "vacuum"},

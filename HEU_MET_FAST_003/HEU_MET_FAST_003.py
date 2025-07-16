@@ -104,8 +104,8 @@ if __name__ == "__main__":
             {"block_ids": [1], "xs": xs_oralloy},
             {"block_ids": [2], "xs": xs_tuballoy},
         ],
+        scattering_order=3,
         options={
-            "scattering_order": 3,
             "use_precursors": False,
             "verbose_inner_iterations": True,
             "verbose_outer_iterations": True,
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     k_solver = NonLinearKEigenSolver(
         lbs_problem=phys,
         nl_max_its=500,
-        nl_abs_tol=1.0e-8,
+        nl_abs_tol=1.0e-9,
     )
     k_solver.Initialize()
     k_solver.Execute()
