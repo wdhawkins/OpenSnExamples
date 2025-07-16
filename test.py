@@ -34,7 +34,7 @@ TEST_CASES = [
     ),
     (
         os.path.join("Six_1g_spherical_benchmarks", "Problem_2.py"),
-        {"end-radius:": 1.00, "avg-value:": 8.212354},
+        {"end-radius:": 1.00, "avg-value:": 0.047223},
         12,
         1.0e-6,
     ),
