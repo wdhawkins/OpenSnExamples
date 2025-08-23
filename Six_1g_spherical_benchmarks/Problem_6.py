@@ -20,7 +20,7 @@ if "opensn_console" not in globals():
     from pyopensn.mesh import FromFileMeshGenerator, PETScGraphPartitioner
     from pyopensn.xs import MultiGroupXS
     from pyopensn.aquad import GLCProductQuadrature3DXYZ
-    from pyopensn.solver import DiscreteOrdinatesProblem, SteadyStateSolver
+    from pyopensn.solver import DiscreteOrdinatesProblem, SteadyStateSourceSolver
     from pyopensn.fieldfunc import FieldFunctionInterpolationVolume
     from pyopensn.logvol import SphereLogicalVolume, BooleanLogicalVolume
     from pyopensn.source import VolumetricSource
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         },
     )
 
-    ss_solver = SteadyStateSolver(problem=phys)
+    ss_solver = SteadyStateSourceSolver(problem=phys)
     ss_solver.Initialize()
     ss_solver.Execute()
 
