@@ -132,7 +132,7 @@ if __name__ == "__main__":
     fflist = phys.GetScalarFieldFunctionList(only_scalar_flux=False)
     vtk_basename = "HEU_MET_FAST_003"
     # export only the flux of group g (first []), moment 0 (second [])
-    FieldFunctionGridBased.ExportMultipleToVTK(
+    FieldFunctionGridBased.ExportMultipleToPVTU(
         [fflist[g][0] for g in range(num_groups)],
         vtk_basename
     )

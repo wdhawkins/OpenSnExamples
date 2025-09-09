@@ -90,7 +90,7 @@ if __name__ == "__main__":
     """
         vtk_basename = "Problem_2_"
         # export only the scalar flux of group g
-        FieldFunctionGridBased.ExportMultipleToVTK(
+        FieldFunctionGridBased.ExportMultipleToPVTU(
             [fflist[g] for g in range(num_groups)],
             vtk_basename
         )

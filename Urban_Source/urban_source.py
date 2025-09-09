@@ -73,4 +73,4 @@ if __name__ == "__main__":
 
     # Export results to VTK
     fflist = phys.GetScalarFieldFunctionList()
-    FieldFunctionGridBased.ExportMultipleToVTK(fflist, "flux")
+    FieldFunctionGridBased.ExportMultipleToPVTU(fflist, "flux")
