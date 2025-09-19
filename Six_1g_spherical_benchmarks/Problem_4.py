@@ -66,16 +66,14 @@ if __name__ == "__main__":
             {"block_ids": [2], "xs": xs_void},
         ],
         scattering_order=0,
-        options={
-            "boundary_conditions": [
-                {"name": "xmin", "type": "isotropic", "group_strength": bsrc},
-                {"name": "xmax", "type": "isotropic", "group_strength": bsrc},
-                {"name": "ymin", "type": "isotropic", "group_strength": bsrc},
-                {"name": "ymax", "type": "isotropic", "group_strength": bsrc},
-                {"name": "zmin", "type": "isotropic", "group_strength": bsrc},
-                {"name": "zmax", "type": "isotropic", "group_strength": bsrc},
-            ],
-        },
+        boundary_conditions=[
+            {"name": "xmin", "type": "isotropic", "group_strength": bsrc},
+            {"name": "xmax", "type": "isotropic", "group_strength": bsrc},
+            {"name": "ymin", "type": "isotropic", "group_strength": bsrc},
+            {"name": "ymax", "type": "isotropic", "group_strength": bsrc},
+            {"name": "zmin", "type": "isotropic", "group_strength": bsrc},
+            {"name": "zmax", "type": "isotropic", "group_strength": bsrc},
+        ],
     )
 
     ss_solver = SteadyStateSourceSolver(problem=phys)
