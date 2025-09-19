@@ -63,9 +63,7 @@ if __name__ == "__main__":
             {"block_ids": [3], "xs": xs_air},
         ],
         scattering_order=0,
-        options={
-            "volumetric_sources": [src],
-        }
+        volumetric_sources=[src],
     )
     ss_solver = SteadyStateSolver(lbs_problem=phys)
     ss_solver.Initialize()

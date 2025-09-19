@@ -67,17 +67,15 @@ if __name__ == "__main__":
             {"block_ids": [2], "xs": xs_void},
         ],
         scattering_order=0,
-        options={
-            "volumetric_sources": [mg_src],
-            "boundary_conditions": [
-                {"name": "xmin", "type": "vacuum"},
-                {"name": "xmax", "type": "vacuum"},
-                {"name": "ymin", "type": "vacuum"},
-                {"name": "ymax", "type": "vacuum"},
-                {"name": "zmin", "type": "vacuum"},
-                {"name": "zmax", "type": "vacuum"},
-            ],
-        },
+        volumetric_sources=[mg_src],
+        boundary_conditions=[
+            {"name": "xmin", "type": "vacuum"},
+            {"name": "xmax", "type": "vacuum"},
+            {"name": "ymin", "type": "vacuum"},
+            {"name": "ymax", "type": "vacuum"},
+            {"name": "zmin", "type": "vacuum"},
+            {"name": "zmax", "type": "vacuum"},
+        ],
     )
 
     ss_solver = SteadyStateSolver(lbs_problem=phys)
