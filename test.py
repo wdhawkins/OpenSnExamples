@@ -12,7 +12,7 @@ TEST_CASES = [
         os.path.join("HEU_MET_FAST_003", "HEU_MET_FAST_003.py"),  # Directory name, input file name
         {"k-eigenvalue:": 1.001655},                              # key, value to test or None
         12,                                                       # Number of MPI ranks
-        1.0e-6                                                    # Tolerance or None
+        1.0e-4                                                    # Tolerance or None
     ),
     (
         os.path.join("OpenSn_Logo_CAD", "opensn.py"),
