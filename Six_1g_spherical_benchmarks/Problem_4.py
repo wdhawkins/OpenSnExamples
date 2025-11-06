@@ -31,6 +31,7 @@ if __name__ == "__main__":
         partitioner=PETScGraphPartitioner(type='parmetis'),
     )
     grid = meshgen.Execute()
+    grid.SetUniformBoundaryID("sphere_surface")
 
     # Create XS
     num_groups = 1
@@ -67,12 +68,7 @@ if __name__ == "__main__":
         ],
         scattering_order=0,
         boundary_conditions=[
-            {"name": "xmin", "type": "isotropic", "group_strength": bsrc},
-            {"name": "xmax", "type": "isotropic", "group_strength": bsrc},
-            {"name": "ymin", "type": "isotropic", "group_strength": bsrc},
-            {"name": "ymax", "type": "isotropic", "group_strength": bsrc},
-            {"name": "zmin", "type": "isotropic", "group_strength": bsrc},
-            {"name": "zmax", "type": "isotropic", "group_strength": bsrc},
+            {"name": "sphere_surface", "type": "isotropic", "group_strength": bsrc},
         ],
     )
 
