@@ -104,7 +104,6 @@ if __name__ == "__main__":
             {"block_ids": [1], "xs": xs_oralloy},
             {"block_ids": [2], "xs": xs_tuballoy},
         ],
-        scattering_order=3,
         options={
             "use_precursors": False,
             "verbose_inner_iterations": True,

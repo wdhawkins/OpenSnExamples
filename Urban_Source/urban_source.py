@@ -62,7 +62,6 @@ if __name__ == "__main__":
             {"block_ids": [2], "xs": xs_source},
             {"block_ids": [3], "xs": xs_air},
         ],
-        scattering_order=0,
         volumetric_sources=[src],
     )
     ss_solver = SteadyStateSourceSolver(problem=phys)

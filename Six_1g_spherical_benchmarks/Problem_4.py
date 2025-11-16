@@ -66,7 +66,6 @@ if __name__ == "__main__":
             {"block_ids": [1], "xs": xs_mat},
             {"block_ids": [2], "xs": xs_void},
         ],
-        scattering_order=0,
         boundary_conditions=[
             {"name": "sphere_surface", "type": "isotropic", "group_strength": bsrc},
         ],
