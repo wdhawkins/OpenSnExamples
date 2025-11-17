@@ -63,7 +63,6 @@ if __name__ == "__main__":
         xs_map=[
             {"block_ids": [1, 2, 3], "xs": xs_void},
         ],
-        scattering_order=0,
         volumetric_sources=[mg_src],
     )
 

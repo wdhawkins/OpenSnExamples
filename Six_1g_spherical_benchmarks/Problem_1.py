@@ -102,7 +102,6 @@ if __name__ == "__main__":
         xs_map=[
             {"block_ids": [1], "xs": xs_mat},
         ],
-        scattering_order=0,
         boundary_conditions=[
             {"name": "sphere_surface", "type": "isotropic", "group_strength": bsrc},
         ],
