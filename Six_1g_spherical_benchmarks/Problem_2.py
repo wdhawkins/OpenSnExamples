@@ -74,7 +74,7 @@ if __name__ == "__main__":
     ss_solver.Execute()
 
     # export
-    fflist = phys.GetFieldFunctions()
+    fflist = phys.GetScalarFluxFieldFunction()
     """
         vtk_basename = "Problem_2_"
         # export only the scalar flux of group g

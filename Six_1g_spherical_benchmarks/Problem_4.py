@@ -76,7 +76,7 @@ if __name__ == "__main__":
     ss_solver.Execute()
 
     # Export
-    fflist = phys.GetFieldFunctions()
+    fflist = phys.GetScalarFluxFieldFunction()
 
     # Compute the average flux over a logical volume
     def average_flx_logvol(logvol):

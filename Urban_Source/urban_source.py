@@ -69,5 +69,5 @@ if __name__ == "__main__":
     ss_solver.Execute()
 
     # Export results to VTK
-    fflist = phys.GetScalarFieldFunctionList()
+    fflist = phys.GetScalarFluxFieldFunction()
     FieldFunctionGridBased.ExportMultipleToPVTU(fflist, "flux")
