@@ -66,7 +66,6 @@ if __name__ == "__main__":
         xs_map=[
             {"block_ids": [1, 2], "xs": xs_void},
         ],
-        scattering_order=0,
         volumetric_sources=[mg_src],
     )
 
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     ss_solver.Execute()
 
     # export
-    fflist = phys.GetFieldFunctions()
+    fflist = phys.GetScalarFluxFieldFunction()
     """
         vtk_basename = "Problem_2_"
         # export only the scalar flux of group g

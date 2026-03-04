@@ -66,7 +66,6 @@ if __name__ == "__main__":
             {"block_ids": [1], "xs": xs_mat},
             {"block_ids": [2], "xs": xs_void},
         ],
-        scattering_order=0,
         volumetric_sources=[mg_src],
     )
 
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     ss_solver.Execute()
 
     # Export
-    fflist = phys.GetFieldFunctions()
+    fflist = phys.GetScalarFluxFieldFunction()
 
     # Compute the average flux over a logical volume
     def average_flx_logvol(logvol):
