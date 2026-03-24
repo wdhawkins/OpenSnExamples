@@ -71,11 +71,11 @@ if __name__ == "__main__":
     # load and modify XS
     xs_oralloy = MultiGroupXS()
     xs_oralloy.LoadFromOpenMC("Oralloy_LANL30g.h5", "Oralloy", 294.0)
-    xs_oralloy.SetScalingFactor(ratios[0])
+    xs_oralloy.Scale(ratios[0])
 
     xs_tuballoy = MultiGroupXS()
     xs_tuballoy.LoadFromOpenMC("Tuballoy_LANL30g.h5", "Tuballoy", 294.0)
-    xs_tuballoy.SetScalingFactor(ratios[1])
+    xs_tuballoy.Scale(ratios[1])
 
     num_groups = xs_tuballoy.num_groups
     if rank == 0:
