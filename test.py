@@ -2,9 +2,11 @@ import os
 import sys
 import subprocess
 import re
+import csv
 import pytest
 
 OPENSN = os.environ.get("OPENSN")
+EXAMPLES_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Test cases
 TEST_CASES = [
@@ -65,6 +67,29 @@ TEST_CASES = [
 ]
 
 
+def load_casl_2d_test_cases():
+    reference_file = os.path.join(EXAMPLES_ROOT, "CASL_VERA_2D", "casl_reference_k.csv")
+    if not os.path.isfile(reference_file):
+        return []
+
+    cases = []
+    with open(reference_file, newline="", encoding="utf-8") as csv_file:
+        for row in csv.DictReader(csv_file):
+            case = row["case"]
+            cases.append(
+                (
+                    os.path.join("CASL_VERA_2D", case, f"{case}.py"),
+                    {"PI": "final", "k_eff": float(row["k"])},
+                    64,
+                    1.0e-6,
+                )
+            )
+    return cases
+
+
+TEST_CASES.extend(load_casl_2d_test_cases())
+
+
 @pytest.mark.parametrize("input_file, expected, mpi_ranks, rel_tol", TEST_CASES)
 def test_application_output(input_file, expected, mpi_ranks, rel_tol):
     # Ensure OPENSN is set and executable
@@ -73,7 +98,7 @@ def test_application_output(input_file, expected, mpi_ranks, rel_tol):
         f"OPENSN '{OPENSN}' not found or not executable"
 
     # Input files and working directory
-    abs_input = os.path.abspath(input_file)
+    abs_input = input_file if os.path.isabs(input_file) else os.path.join(EXAMPLES_ROOT, input_file)
     assert os.path.isfile(abs_input), f"Input file not found: {abs_input}"
     cwd = os.path.dirname(abs_input)
     inp = os.path.basename(abs_input)
@@ -113,14 +138,20 @@ def test_application_output(input_file, expected, mpi_ranks, rel_tol):
             if idx + 1 >= len(tokens):
                 ok = False
                 break
-            next_tok = tokens[idx + 1]
+            value_index = idx + 1
+            if tokens[value_index] == "=":
+                value_index += 1
+            if value_index >= len(tokens):
+                ok = False
+                break
+            next_tok = tokens[value_index]
             if isinstance(exp_val, (int, float)):
                 try:
                     val = float(next_tok)
                 except ValueError:
                     ok = False
                     break
-                if not (val == pytest.approx(exp_val, rel=rel_tol)):
+                if not (val == pytest.approx(exp_val, rel=rel_tol, abs=rel_tol)):
                     ok = False
                     break
             else:

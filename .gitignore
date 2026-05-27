@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+!CASL_VERA_2D/assets/mesh/casl/*.obj
 
 # Precompiled Headers
 *.gch
