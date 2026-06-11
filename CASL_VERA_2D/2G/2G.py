@@ -1,0 +1,259 @@
+import os
+from pathlib import Path
+import sys
+import math
+import numpy as np
+import csv
+from collections import Counter
+from mpi4py import MPI
+
+path = os.getcwd()
+
+sys.path.append("../../..")
+
+if "opensn_console" not in globals():
+    from pyopensn.mesh import FromFileMeshGenerator, KBAGraphPartitioner
+    from pyopensn.xs import MultiGroupXS
+    from pyopensn.aquad import GLCProductQuadrature2DXY
+    from pyopensn.solver import (
+        DiscreteOrdinatesProblem,
+        PowerIterationKEigenSolver,
+        CMFDAcceleration,
+    )
+    from pyopensn.logvol import LogicalVolume, RCCLogicalVolume
+    from pyopensn.fieldfunc import FieldFunctionInterpolationVolume
+
+
+def find_repo_root(start):
+    for candidate in (start, *start.parents):
+        if (candidate / "assets/mesh/casl").exists():
+            return candidate
+    raise RuntimeError("Could not locate the OpenSn repository root from " + str(start))
+
+
+casename = '2G'
+h5_name = '2g'
+
+script_dir = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd().resolve()
+repo_root = find_repo_root(script_dir)
+casl_mesh_dir = repo_root / "assets/mesh/casl"
+casl_xs_dir = repo_root / "assets/xs/casl"
+
+mesh_filepath = str(casl_mesh_dir / ('lattice_' + casename + '.obj'))
+
+
+def make_spatial_partitioner(filename):
+    num_partitions = MPI.COMM_WORLD.size
+    nx = math.isqrt(num_partitions)
+    while num_partitions % nx != 0:
+        nx -= 1
+    ny = num_partitions // nx
+    if nx < ny:
+        nx, ny = ny, nx
+
+    xmin = ymin = float("inf")
+    xmax = ymax = -float("inf")
+    with open(filename, encoding="utf-8") as mesh_file:
+        for line in mesh_file:
+            if not line.startswith("v "):
+                continue
+            _, x, y, *_ = line.split()
+            x = float(x)
+            y = float(y)
+            xmin = min(xmin, x)
+            xmax = max(xmax, x)
+            ymin = min(ymin, y)
+            ymax = max(ymax, y)
+
+    xcuts = [xmin + (xmax - xmin) * i / nx for i in range(1, nx)]
+    ycuts = [ymin + (ymax - ymin) * i / ny for i in range(1, ny)]
+    return KBAGraphPartitioner(nx=nx, ny=ny, xcuts=xcuts, ycuts=ycuts)
+
+
+meshgen = FromFileMeshGenerator(
+    filename=mesh_filepath,
+    partitioner=make_spatial_partitioner(mesh_filepath)
+)
+
+grid = meshgen.Execute()
+grid.SetOrthogonalBoundaries()
+grid.ExportToPVTU('mesh_2A')
+
+xs_filename = 'mgxs_' + h5_name + '_one_eighth_SHEM-361.h5'
+xs_filepath = str(casl_xs_dir / ('mgxs_casl_' + h5_name) / xs_filename)
+xs_dict = {}
+xs_list = []
+
+h5_mat_names = ['aic',
+                'aic_clad',
+                'fuel',
+                'clad',
+                'gap',
+                'aic_gap',
+                'aic_guide',
+                'it-clad',
+                'it-water-in',
+                'it-water-out',
+                'moderator',
+                'aic_water',
+                'water_outside']
+
+for name in h5_mat_names:
+    xs_dict[name] = MultiGroupXS()
+    xs_dict[name].LoadFromOpenMC(xs_filepath, name, 294.0)
+    xs_list = np.append(xs_list, xs_dict[name])
+
+block_ids = [i for i in range(0, len(xs_list))]
+
+scat_order = 3  # xs_list[0].scattering_order
+
+pquad = GLCProductQuadrature2DXY(n_polar=4, n_azimuthal=32, scattering_order=scat_order)
+
+num_groups = 361
+
+group_sets = [{
+    "groups_from_to": [0, num_groups - 1],
+    "angular_quadrature": pquad,
+    "angle_aggregation_num_subsets": 1,
+    "inner_linear_method": "petsc_gmres",
+    "l_abs_tol": 1.0e-7,
+    "l_max_its": 300
+}]
+
+# fix this when automating it stops breaking
+bound_conditions = [
+    {'name': "xmin", 'type': "reflecting"},
+    {'name': "xmax", 'type': "reflecting"},
+    {'name': "ymin", 'type': "reflecting"},
+    {'name': "ymax", 'type': "reflecting"},
+]
+
+# fix this when automating it stops breaking
+xs_mapping = [
+    {'block_ids': [0], 'xs': xs_list[0]},
+    {'block_ids': [1], 'xs': xs_list[1]},
+    {'block_ids': [2], 'xs': xs_list[2]},
+    {'block_ids': [3], 'xs': xs_list[3]},
+    {'block_ids': [4], 'xs': xs_list[4]},
+    {'block_ids': [5], 'xs': xs_list[5]},
+    {'block_ids': [6], 'xs': xs_list[6]},
+    {'block_ids': [7], 'xs': xs_list[7]},
+    {'block_ids': [8], 'xs': xs_list[8]},
+    {'block_ids': [9], 'xs': xs_list[9]},
+    {'block_ids': [10], 'xs': xs_list[10]},
+    {'block_ids': [11], 'xs': xs_list[11]},
+    {'block_ids': [12], 'xs': xs_list[12]}
+]
+phys = DiscreteOrdinatesProblem(
+    mesh=grid,
+    num_groups=num_groups,
+    groupsets=group_sets,
+    xs_map=xs_mapping,
+    boundary_conditions=bound_conditions,
+    options={
+        "verbose_inner_iterations": True,
+        "verbose_outer_iterations": True,
+        "use_precursors": False,
+        "power_default_kappa": 1.0,
+        "save_angular_flux": False,
+    },
+)
+
+
+cmfd = CMFDAcceleration(
+    problem=phys,
+    current_closure="auto",
+    relaxation=1.0,
+    coarse_mesh="local_aggregation",
+    coarse_solver_policy="direct",
+    aggregation_size=64,
+    group_aggregation_size=(num_groups + 63) // 64,
+    update_wgs_max_its=1,
+    update_wgs_abs_tol=1.0e-12,
+    balance_residual_tolerance=1.0e-5,
+)
+
+k_solver = PowerIterationKEigenSolver(problem=phys, acceleration=cmfd,
+                                      k_tol=1.0e-6
+                                      )
+k_solver.Initialize()
+k_solver.Execute()
+
+keff = k_solver.GetEigenvalue()
+fflist = phys.GetScalarFluxFieldFunction()
+
+pitch = 1.26
+num_cells = 17
+half_water_gap = 0.04
+
+
+def compute_cell_center(i, j):
+    x_center = (i - 1) * pitch - (num_cells / 2) * pitch
+    y_center = (j - 1) * pitch - (num_cells / 2) * pitch
+    return x_center, y_center
+
+
+your_files = os.getcwd()
+
+
+def read_csv_to_2d_array(file_path):
+    with open(file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        data = [row for row in reader]
+    return np.asarray(data)
+
+
+def count_frequencies(data):
+    flattened_data = [item for row in data for item in row]  # Flatten 2D array into a 1D list
+    cell_frequencies = Counter(flattened_data)
+    print("cell name frequency:")
+    total = 0
+    for key, value in cell_frequencies.items():
+        print(f'"{key}": {value}')
+        total += value
+    print("total: ", total)
+
+
+csv_filename = 'FA_cell_names_1_family.csv'
+csv_filepath = your_files + '/' + csv_filename
+
+lattice_csv = read_csv_to_2d_array(csv_filepath)
+
+count_frequencies(lattice_csv)
+
+if lattice_csv.shape[0] != lattice_csv.shape[1]:
+    raise Exception('CSV array of cell names is not square.')
+
+csv_size = lattice_csv.shape[0]
+
+val_table = np.zeros([num_cells, num_cells])
+
+fuel_xs = xs_dict["fuel"]
+sig_f = np.array(fuel_xs.sigma_f)
+
+
+for i in range(1, num_cells + 1):
+    for j in range(1, num_cells + 1):
+        if lattice_csv[i - 1, j - 1] == 'fu':
+            x_center, y_center = compute_cell_center(i, j)
+            my_lv = RCCLogicalVolume(r=0.4060, x0=x_center, y0=y_center, z0=-1.0, vz=2.0)
+
+            val = 0
+            for g in range(0, num_groups):
+                ffi = FieldFunctionInterpolationVolume()
+                ffi.SetOperationType('sum')
+                ffi.SetLogicalVolume(my_lv)
+                ffi.AddFieldFunction(fflist[g])
+                ffi.Execute()
+                val_g = ffi.GetValue()
+                val += val_g * sig_f[g]
+            val_table[i - 1][j - 1] = val
+
+maxes = np.zeros([num_cells])
+for i in range(0, num_cells):
+    maxes[i] = max(val_table[:, i])
+val_max = max(maxes)
+
+np.savetxt("power.txt", val_table / val_max)
+with open("keff.txt", "w") as file:
+    file.write(str(keff))
