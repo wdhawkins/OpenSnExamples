@@ -5,11 +5,13 @@ import math
 import numpy as np
 import csv
 from collections import Counter
-from mpi4py import MPI
 
 sys.path.append("../../..")
 
 if "opensn_console" not in globals():
+    from mpi4py import MPI
+    size = MPI.COMM_WORLD.size
+    rank = MPI.COMM_WORLD.rank
     from pyopensn.mesh import FromFileMeshGenerator, KBAGraphPartitioner
     from pyopensn.xs import MultiGroupXS
     from pyopensn.aquad import GLCProductQuadrature2DXY
@@ -41,7 +43,7 @@ mesh_filepath = str(casl_mesh_dir / ('lattice_' + casename + '.obj'))
 
 
 def make_spatial_partitioner(filename):
-    num_partitions = MPI.COMM_WORLD.size
+    num_partitions = size
     nx = math.isqrt(num_partitions)
     while num_partitions % nx != 0:
         nx -= 1
@@ -103,7 +105,6 @@ num_groups = 361
 group_sets = [{
     "groups_from_to": [0, num_groups - 1],
     "angular_quadrature": pquad,
-    "angle_aggregation_num_subsets": 1,
     "inner_linear_method": "petsc_gmres",
     "l_abs_tol": 1.0e-7,
     "l_max_its": 300
