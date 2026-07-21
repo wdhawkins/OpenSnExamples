@@ -95,7 +95,6 @@ if __name__ == "__main__":
                 ),
                 "inner_linear_method": "petsc_gmres",
                 "angle_aggregation_type": "single",
-                "angle_aggregation_num_subsets": 1,
                 "l_max_its": 500,
                 "l_abs_tol": 1.0e-6,
             },

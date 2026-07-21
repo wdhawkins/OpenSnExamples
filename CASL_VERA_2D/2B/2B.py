@@ -5,14 +5,17 @@ import math
 import numpy as np
 import csv
 from collections import Counter
-from mpi4py import MPI
+from typing import Any, cast
 
-rank = MPI.COMM_WORLD.rank
 path = os.getcwd()
 
 sys.path.append("../../..")
 
 if "opensn_console" not in globals():
+    from mpi4py import MPI
+    size = MPI.COMM_WORLD.size
+    rank = MPI.COMM_WORLD.rank
+    barrier = MPI.COMM_WORLD.Barrier
     from pyopensn.mesh import FromFileMeshGenerator, KBAGraphPartitioner
     from pyopensn.xs import MultiGroupXS
     from pyopensn.aquad import GLCProductQuadrature2DXY
@@ -23,6 +26,8 @@ if "opensn_console" not in globals():
     )
     from pyopensn.logvol import LogicalVolume, RCCLogicalVolume
     from pyopensn.fieldfunc import FieldFunctionInterpolationVolume
+else:
+    barrier = cast(Any, globals()["MPIBarrier"])
 
 
 def find_repo_root(start):
@@ -44,7 +49,7 @@ mesh_filepath = str(casl_mesh_dir / ('lattice_' + casename + '.obj'))
 
 
 def make_spatial_partitioner(filename):
-    num_partitions = MPI.COMM_WORLD.size
+    num_partitions = size
     nx = math.isqrt(num_partitions)
     while num_partitions % nx != 0:
         nx -= 1
@@ -117,7 +122,6 @@ group_sets = [
         "groups_from_to": [0, num_groups - 1],
         "angular_quadrature": pquad,
         "angle_aggregation_type": "polar",
-        "angle_aggregation_num_subsets": 1,
         "inner_linear_method": "petsc_gmres",
         "l_abs_tol": 1.0e-7,
         "l_max_its": 300,
@@ -289,7 +293,7 @@ val_table = np.vstack([B, B_flipped[1:, :]])
 norm = np.sum(val_table) / cell_frequencies["fu"]
 val_table /= norm
 
-MPI.COMM_WORLD.Barrier()
+barrier()
 
 if rank == 0:
     # print("sum=", np.sum(val_table))
